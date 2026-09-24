@@ -14,16 +14,13 @@ export default function HouseholdMembersTable({
 }) {
   if (!isExpanded) return null;
 
-  const nonHeadMembers = members.filter(
-    (member) =>
-      ((member.relationshipToHead || member.nuclearRelation || '').toLowerCase() !== 'head')
-  );
+  const visibleMembers = members;
 
-  const maleCount = nonHeadMembers.filter(
+  const maleCount = visibleMembers.filter(
     (member) => (member.sex || '').toLowerCase() === 'male'
   ).length;
 
-  const femaleCount = nonHeadMembers.filter(
+  const femaleCount = visibleMembers.filter(
     (member) => (member.sex || '').toLowerCase() === 'female'
   ).length;
 
@@ -61,7 +58,7 @@ export default function HouseholdMembersTable({
             <p className="mt-2 animate-pulse text-sm text-slate-500">
               Loading household members...
             </p>
-          ) : members.length === 0 || nonHeadMembers.length === 0 ? (
+          ) : visibleMembers.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
               <p className="text-sm text-slate-500">No household members found.</p>
             </div>
@@ -93,7 +90,7 @@ export default function HouseholdMembersTable({
                   </thead>
 
                   <tbody>
-                    {nonHeadMembers.map((member) => {
+                    {visibleMembers.map((member) => {
                       const name =
                         member.fullName ||
                         formatFullName({
@@ -173,7 +170,7 @@ export default function HouseholdMembersTable({
                   Female: {femaleCount}
                 </div>
                 <div className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
-                  Total Members: {nonHeadMembers.length}
+                  Total Members: {visibleMembers.length}
                 </div>
               </div>
             </>

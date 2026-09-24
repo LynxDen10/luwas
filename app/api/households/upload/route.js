@@ -16,6 +16,24 @@ function getFileExtension(fileName = '') {
   return String(fileName).split('.').pop().toLowerCase();
 }
 
+function getRowValue(row = {}, aliases = []) {
+  const normalizedKeys = new Map(
+    Object.keys(row).map((key) => [key.replace(/[^a-z0-9]/gi, '').toLowerCase(), key])
+  );
+
+  for (const alias of aliases) {
+    const sourceKey = normalizedKeys.get(
+      String(alias).replace(/[^a-z0-9]/gi, '').toLowerCase()
+    );
+
+    if (sourceKey && row[sourceKey] !== undefined && row[sourceKey] !== null) {
+      return row[sourceKey];
+    }
+  }
+
+  return '';
+}
+
 function parseCoordinate(value) {
   if (value === null || value === undefined) {
     return null;
@@ -174,17 +192,19 @@ function buildHouseholdsMap(householdRows, memberRows) {
   const householdsMap = {};
 
   householdRows.forEach((row) => {
-    const householdId = String(row['Household ID'] || '').trim();
+    const householdId = String(
+      getRowValue(row, ['Household ID', 'householdId', 'household_id', 'id'])
+    ).trim();
     if (!householdId) {
       return;
     }
 
     const normalizedNames = processHeadName({
-      headFirstName: row.headFirstName || row['Head FirstName'],
-      headMiddleName: row.headMiddleName || row['Head Middle Name'] || row['Head MiddleName'],
-      headLastName: row.headLastName || row['Head Last Name'] || row['Head LastName'],
-      headSuffix: row.headSuffix || row['Head Suffix'],
-      headFullName: row.headFullName || row['Head FullName'],
+      headFirstName: getRowValue(row, ['headFirstName', 'Head FirstName', 'Head First Name']),
+      headMiddleName: getRowValue(row, ['headMiddleName', 'Head Middle Name', 'Head MiddleName']),
+      headLastName: getRowValue(row, ['headLastName', 'Head Last Name', 'Head LastName']),
+      headSuffix: getRowValue(row, ['headSuffix', 'Head Suffix']),
+      headFullName: getRowValue(row, ['headFullName', 'Head FullName', 'Head Full Name']),
     });
 
     householdsMap[householdId] = {
@@ -193,29 +213,40 @@ function buildHouseholdsMap(householdRows, memberRows) {
       headMiddleName: normalizedNames.middleName,
       headLastName: normalizedNames.lastName,
       headSuffix: normalizedNames.suffix,
-      headSex: row.headSex || row['Head Sex'] || '',
-      headAge: Number(row.headAge || row['Head Age']) || 0,
-      contactNumber: row.headContactNumber || row['Contact Number'] || 'N/A',
-      barangay: row.barangay || row['Barangay'] || '',
-      sitio: row.sitio || row['Sitio'] || '',
+      headSex: getRowValue(row, ['headSex', 'Head Sex']),
+      headAge: Number(getRowValue(row, ['headAge', 'Head Age'])) || 0,
+      contactNumber: getRowValue(row, ['headContactNumber', 'Contact Number']) || 'N/A',
+      barangay: getRowValue(row, ['barangay', 'Barangay']),
+      sitio: getRowValue(row, ['sitio', 'Sitio']),
       homes: normalizeHomes(row),
       members: [],
     };
   });
 
+  let currentMemberHouseholdId = '';
+
   memberRows.forEach((row) => {
-    const householdId = String(row['Household ID'] || '').trim();
-    const memberId = String(row['Member ID'] || '').trim();
+    const rowHouseholdId = String(
+      getRowValue(row, ['Household ID', 'householdId', 'household_id'])
+    ).trim();
+    if (rowHouseholdId) {
+      currentMemberHouseholdId = rowHouseholdId;
+    }
+
+    const householdId = rowHouseholdId || currentMemberHouseholdId;
+    const memberId = String(
+      getRowValue(row, ['Member ID', 'memberId', 'member_id', 'id'])
+    ).trim();
 
     if (!householdId || !memberId || !householdsMap[householdId]) {
       return;
     }
 
     const normalizedMemberNames = normalizeNameComponents({
-      firstName: row.firstName || row['FirstName'],
-      middleName: row.middleName || row['MiddleName'],
-      lastName: row.lastName || row['LastName'],
-      suffix: row.suffix || row['Suffix'],
+      firstName: getRowValue(row, ['firstName', 'FirstName', 'First Name']),
+      middleName: getRowValue(row, ['middleName', 'MiddleName', 'Middle Name']),
+      lastName: getRowValue(row, ['lastName', 'LastName', 'Last Name']),
+      suffix: getRowValue(row, ['suffix', 'Suffix']),
     });
 
     householdsMap[householdId].members.push({
@@ -224,18 +255,21 @@ function buildHouseholdsMap(householdRows, memberRows) {
       middleName: normalizedMemberNames.middleName,
       lastName: normalizedMemberNames.lastName,
       suffix: normalizedMemberNames.suffix,
-      relationshipToHead:
-        row.relationshipToHead || row['Relationship To Head'] || '',
-      sex: row.sex || row['Sex'] || '',
-      age: Number(row.age || row['Age']) || 0,
-      contactNumber:
-        row.memberContactNumber || row['Member Contact Number'] || '',
-      isPWD:
-        row.isPWD === 'true' ||
-        row.isPWD === true ||
-        row['Is PWD'] === 'true' ||
-        false,
-      isSeniorCitizen: (Number(row.age || row['Age']) || 0) >= 60,
+      relationshipToHead: getRowValue(row, [
+        'relationshipToHead',
+        'Relationship To Head',
+      ]),
+      sex: getRowValue(row, ['sex', 'Sex']),
+      age: Number(getRowValue(row, ['age', 'Age'])) || 0,
+      contactNumber: getRowValue(row, [
+        'memberContactNumber',
+        'Member Contact Number',
+        'Contact Number',
+      ]),
+      isPWD: ['true', 'yes', '1'].includes(
+        String(getRowValue(row, ['isPWD', 'Is PWD'])).trim().toLowerCase()
+      ),
+      isSeniorCitizen: (Number(getRowValue(row, ['age', 'Age'])) || 0) >= 60,
     });
   });
 

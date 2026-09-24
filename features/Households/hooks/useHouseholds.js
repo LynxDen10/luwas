@@ -252,9 +252,21 @@ export function useHouseholds() {
                 [householdId]: true,
               }));
 
-              const result = await householdApi.fetchMembers(householdId);
+              const firstResult = await householdApi.fetchMembers(householdId, {
+                page: 1,
+                limit: 100,
+              });
+              const allMembers = [...(firstResult.members || [])];
 
-              const normalizedMembers = (result.members || [])
+              for (let nextPage = 2; nextPage <= (firstResult.totalPages || 1); nextPage += 1) {
+                const pageResult = await householdApi.fetchMembers(householdId, {
+                  page: nextPage,
+                  limit: 100,
+                });
+                allMembers.push(...(pageResult.members || []));
+              }
+
+              const normalizedMembers = allMembers
                 .map((member) => normalizeMember(member))
                 .sort(compareMemberNames);
 
