@@ -8,7 +8,7 @@ export default function AppHeader() {
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-4">
         <div className="grid w-full max-w-3xl grid-cols-[1fr_auto_1fr] items-center gap-3">
           <div className="flex justify-end">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm sm:h-20 sm:w-20">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full sm:h-20 sm:w-20">
               <Image
                 src="/clarinLogo.png"
                 alt="Clarin Logo"
