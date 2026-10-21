@@ -27,7 +27,7 @@ export default function AppHeader() {
           </div>
 
           <div className="flex justify-start">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm sm:h-20 sm:w-20">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full sm:h-20 sm:w-20">
               <Image
                 src="/mdrrmcLogo.png"
                 alt="MDRRMC Logo"
