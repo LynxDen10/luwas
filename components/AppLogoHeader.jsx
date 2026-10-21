@@ -31,7 +31,7 @@ export default function AppHeader() {
               <Image
                 src="/mdrrmcLogo.png"
                 alt="MDRRMC Logo"
-                width={85}
+                width={72}
                 height={85}
                 className="h-auto w-[52px] object-contain sm:w-[64px]"
                 priority
