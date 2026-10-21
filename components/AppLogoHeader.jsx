@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 export default function AppHeader() {
   return (
-    <header className="w-full bg-gradient-to-t from-green-50 to-white px-4 py-6">
+    <header className="w-full bg-transparent px-4 py-6">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-4">
         <div className="grid w-full max-w-3xl grid-cols-[1fr_auto_1fr] items-center gap-3">
           <div className="flex justify-end">
