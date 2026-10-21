@@ -12,8 +12,8 @@ export default function AppHeader() {
               <Image
                 src="/clarinLogo.png"
                 alt="Clarin Logo"
-                width={72}
-                height={72}
+                width={62}
+                height={62}
                 className="h-auto w-[52px] object-contain sm:w-[64px]"
                 priority
               />
